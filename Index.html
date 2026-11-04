@@ -1,0 +1,772 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BiblioFacile</title>
+
+<style>
+:root {
+  --fond: #071629;
+  --carte: #10243d;
+  --or: #e8b84b;
+  --texte: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: var(--fond);
+  color: var(--texte);
+}
+
+header {
+  background: #06101f;
+  padding: 22px 15px;
+  text-align: center;
+  border-bottom: 2px solid var(--or);
+}
+
+header h1 {
+  color: var(--or);
+  margin: 0;
+  font-size: 30px;
+}
+
+header p {
+  margin-bottom: 0;
+  color: #ddd;
+}
+
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  background: #0b1c30;
+}
+
+button {
+  background: var(--or);
+  color: #17202c;
+  border: none;
+  border-radius: 7px;
+  padding: 11px 15px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+nav button {
+  background: #18324f;
+  color: white;
+  border: 1px solid var(--or);
+}
+
+nav button:hover,
+button:hover {
+  opacity: 0.85;
+}
+
+main {
+  max-width: 1050px;
+  margin: auto;
+  padding: 20px;
+}
+
+section {
+  display: none;
+}
+
+section.active {
+  display: block;
+}
+
+h2 {
+  color: var(--or);
+}
+
+.card {
+  background: var(--carte);
+  padding: 18px;
+  border-radius: 12px;
+  margin: 12px 0;
+  border: 1px solid #28435f;
+}
+
+input, textarea, select {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 7px;
+  border: 1px solid #789;
+  background: #f5f5f5;
+  color: #111;
+}
+
+textarea {
+  min-height: 90px;
+}
+
+.livres {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 15px;
+}
+
+.livre {
+  background: var(--carte);
+  padding: 17px;
+  border-radius: 10px;
+  border-top: 3px solid var(--or);
+}
+
+.livre h3 {
+  color: var(--or);
+}
+
+.small {
+  font-size: 13px;
+  color: #ccc;
+}
+
+.message {
+  padding: 12px;
+  border-radius: 7px;
+  margin: 10px 0;
+  background: #183b32;
+  color: #baffd6;
+}
+
+.erreur {
+  background: #492323;
+  color: #ffd0d0;
+}
+
+footer {
+  text-align: center;
+  padding: 25px;
+  background: #06101f;
+  color: #ccc;
+  margin-top: 30px;
+}
+
+.cache {
+  display: none !important;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.actions button {
+  padding: 8px 10px;
+  font-size: 12px;
+}
+
+.danger {
+  background: #d9534f;
+  color: white;
+}
+
+.secondaire {
+  background: #36536f;
+  color: white;
+}
+
+@media(max-width: 500px) {
+  header h1 {
+    font-size: 25px;
+  }
+
+  main {
+    padding: 12px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>📚 BiblioFacile</h1>
+  <p>Votre bibliothèque numérique, partout avec vous</p>
+</header>
+
+<nav>
+  <button onclick="afficherPage('accueil')">Accueil</button>
+  <button onclick="afficherPage('catalogue')">Livres</button>
+  <button onclick="afficherPage('inscription')">Inscription</button>
+  <button onclick="afficherPage('connexion')">Connexion</button>
+  <button id="boutonCompte" class="cache" onclick="afficherPage('compte')">Mon compte</button>
+  <button onclick="afficherPage('apropos')">À propos</button>
+  <button onclick="afficherPage('admin')">Administration</button>
+</nav>
+
+<main>
+
+<section id="accueil" class="active">
+  <div class="card">
+    <h2>Bienvenue sur BiblioFacile !</h2>
+    <p>
+      Découvrez notre bibliothèque numérique. Recherchez des livres,
+      explorez différentes catégories et retrouvez vos ouvrages préférés.
+    </p>
+    <button onclick="afficherPage('catalogue')">Découvrir les livres</button>
+    <button onclick="afficherPage('inscription')">Créer un compte</button>
+  </div>
+
+  <div class="card">
+    <h2>Pourquoi BiblioFacile ?</h2>
+    <p>Une plateforme simple pour découvrir et consulter un catalogue de livres.</p>
+  </div>
+</section>
+
+<section id="catalogue">
+  <h2>📖 Catalogue des livres</h2>
+
+  <input type="text" id="recherche"
+    placeholder="Rechercher un livre ou un auteur..."
+    oninput="afficherLivres()">
+
+  <select id="filtre" onchange="afficherLivres()">
+    <option value="">Toutes les catégories</option>
+    <option>Roman</option>
+    <option>Science</option>
+    <option>Histoire</option>
+    <option>Développement personnel</option>
+    <option>Informatique</option>
+  </select>
+
+  <div id="listeLivres" class="livres"></div>
+</section>
+
+<section id="inscription">
+  <div class="card">
+    <h2>Créer un compte</h2>
+    <p>Inscrivez-vous pour accéder à votre espace personnel.</p>
+
+    <form onsubmit="inscrireUtilisateur(event)">
+      <input id="nomInscription" placeholder="Votre nom" required>
+      <input id="identifiantInscription" placeholder="Choisissez un identifiant" required>
+      <input id="motInscription" type="password" placeholder="Choisissez un mot de passe" required minlength="4">
+      <button type="submit">Créer mon compte</button>
+    </form>
+
+    <div id="messageInscription"></div>
+    <p>Vous avez déjà un compte ?
+      <button onclick="afficherPage('connexion')">Se connecter</button>
+    </p>
+  </div>
+</section>
+
+<section id="connexion">
+  <div class="card">
+    <h2>Connexion utilisateur</h2>
+
+    <form onsubmit="connecterUtilisateur(event)">
+      <input id="identifiantConnexion" placeholder="Votre identifiant" required>
+      <input id="motConnexion" type="password" placeholder="Votre mot de passe" required>
+      <button type="submit">Se connecter</button>
+    </form>
+
+    <div id="messageConnexion"></div>
+    <p>Pas encore de compte ?
+      <button onclick="afficherPage('inscription')">S'inscrire</button>
+    </p>
+  </div>
+</section>
+
+<section id="compte">
+  <div class="card">
+    <h2>👤 Mon espace personnel</h2>
+    <p>Bienvenue dans votre espace personnel !</p>
+    <div id="informationsCompte"></div>
+    <button class="danger" onclick="deconnecterUtilisateur()">Se déconnecter</button>
+  </div>
+
+  <div class="card">
+    <h2>Mes recommandations</h2>
+    <p>Découvrez les livres disponibles dans notre catalogue.</p>
+    <button onclick="afficherPage('catalogue')">Voir le catalogue</button>
+  </div>
+</section>
+
+<section id="ajouter">
+  <div class="card">
+    <h2>Ajouter un livre</h2>
+
+    <form onsubmit="ajouterLivre(event)">
+      <input id="titreLivre" placeholder="Titre du livre" required>
+      <input id="auteurLivre" placeholder="Nom de l'auteur" required>
+
+      <select id="categorieLivre" required>
+        <option value="">Choisir une catégorie</option>
+        <option>Roman</option>
+        <option>Science</option>
+        <option>Histoire</option>
+        <option>Développement personnel</option>
+        <option>Informatique</option>
+      </select>
+
+      <textarea id="descriptionLivre" placeholder="Description du livre" required></textarea>
+      <button type="submit">Enregistrer le livre</button>
+    </form>
+  </div>
+</section>
+
+<section id="apropos">
+  <div class="card">
+    <h2>À propos de BiblioFacile</h2>
+    <p>
+      BiblioFacile est une plateforme numérique conçue pour faciliter
+      la découverte et la gestion d'un catalogue de livres.
+    </p>
+    <h3>Créateur du site</h3>
+    <p><strong>KAMGA SOB KILLIAN</strong></p>
+    <p>Projet réalisé dans le cadre d'un travail scolaire.</p>
+  </div>
+</section>
+
+<section id="admin">
+  <div id="connexionAdmin" class="card">
+    <h2>🔐 Administration</h2>
+    <form onsubmit="connecterAdmin(event)">
+      <input id="nomAdmin" placeholder="Nom d'administrateur" required>
+      <input id="motAdmin" type="password" placeholder="Mot de passe" required>
+      <button type="submit">Accéder à l'administration</button>
+    </form>
+    <div id="messageAdmin"></div>
+  </div>
+
+  <div id="espaceAdmin" class="cache">
+    <div class="card">
+      <h2>Tableau de bord</h2>
+      <p>Nombre de livres : <strong id="nombreLivres">0</strong></p>
+      <p>Nombre d'utilisateurs : <strong id="nombreUtilisateurs">0</strong></p>
+      <button onclick="afficherPage('ajouter')">Ajouter un livre</button>
+      <button onclick="afficherPage('couleurs')">Personnaliser les couleurs</button>
+      <button class="danger" onclick="deconnecterAdmin()">Déconnexion admin</button>
+    </div>
+
+    <div class="card">
+      <h2>Gestion des livres</h2>
+      <div id="gestionLivres"></div>
+    </div>
+
+    <div class="card">
+      <h2>Gestion des utilisateurs</h2>
+      <div id="gestionUtilisateurs"></div>
+    </div>
+  </div>
+</section>
+
+<section id="couleurs">
+  <div class="card">
+    <h2>Personnaliser le site</h2>
+
+    <label>Couleur de fond</label>
+    <input type="color" id="couleurFond" value="#071629">
+
+    <label>Couleur des cartes</label>
+    <input type="color" id="couleurCarte" value="#10243d">
+
+    <label>Couleur principale</label>
+    <input type="color" id="couleurOr" value="#e8b84b">
+
+    <button onclick="enregistrerCouleurs()">Enregistrer les couleurs</button>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p>© 2026 BiblioFacile</p>
+  <p>Créé par KAMGA SOB KILLIAN</p>
+</footer>
+
+<script>
+const CLE_LIVRES = "bibliolivres";
+const CLE_UTILISATEURS = "biblioUtilisateurs";
+const CLE_COULEURS = "biblioCouleurs";
+
+function lireStockage(cle, valeurDefaut) {
+  try {
+    const valeur = localStorage.getItem(cle);
+    return valeur ? JSON.parse(valeur) : valeurDefaut;
+  } catch (erreur) {
+    return valeurDefaut;
+  }
+}
+
+let livres = lireStockage(CLE_LIVRES, [
+  {
+    id: 1,
+    titre: "Les Misérables",
+    auteur: "Victor Hugo",
+    categorie: "Roman",
+    description: "Un grand roman sur la justice, la liberté et la société."
+  },
+  {
+    id: 2,
+    titre: "L'Étranger",
+    auteur: "Albert Camus",
+    categorie: "Roman",
+    description: "Un roman célèbre de la littérature française."
+  },
+  {
+    id: 3,
+    titre: "Une brève histoire du temps",
+    auteur: "Stephen Hawking",
+    categorie: "Science",
+    description: "Une introduction aux grandes questions de l'univers."
+  },
+  {
+    id: 4,
+    titre: "L'Art de la guerre",
+    auteur: "Sun Tzu",
+    categorie: "Histoire",
+    description: "Un ouvrage classique sur la stratégie."
+  },
+  {
+    id: 5,
+    titre: "Père riche, père pauvre",
+    auteur: "Robert Kiyosaki",
+    categorie: "Développement personnel",
+    description: "Un livre sur l'éducation financière."
+  },
+  {
+    id: 6,
+    titre: "L'informatique pour tous",
+    auteur: "Collection BiblioFacile",
+    categorie: "Informatique",
+    description: "Une découverte des bases de l'informatique."
+  }
+]);
+
+let utilisateurs = lireStockage(CLE_UTILISATEURS, []);
+let utilisateurConnecte = null;
+let adminConnecte = false;
+
+function sauvegarderLivres() {
+  localStorage.setItem(CLE_LIVRES, JSON.stringify(livres));
+}
+
+function sauvegarderUtilisateurs() {
+  localStorage.setItem(CLE_UTILISATEURS, JSON.stringify(utilisateurs));
+}
+
+function afficherPage(id) {
+  if (id === "compte" && !utilisateurConnecte) {
+    alert("Connectez-vous pour accéder à votre espace personnel.");
+    id = "connexion";
+  }
+
+  if (id === "ajouter" && !adminConnecte) {
+    alert("Seul l'administrateur peut ajouter un livre.");
+    id = "admin";
+  }
+
+  if (id === "couleurs" && !adminConnecte) {
+    alert("Accès réservé à l'administrateur.");
+    id = "admin";
+  }
+
+  document.querySelectorAll("main section").forEach(section => {
+    section.classList.remove("active");
+  });
+
+  document.getElementById(id).classList.add("active");
+
+  if (id === "catalogue") afficherLivres();
+  if (id === "compte") afficherCompte();
+  if (id === "admin") actualiserAdmin();
+
+  window.scrollTo(0, 0);
+}
+
+function afficherLivres() {
+  const zone = document.getElementById("listeLivres");
+  const recherche = document.getElementById("recherche").value.toLowerCase();
+  const categorie = document.getElementById("filtre").value;
+
+  const resultats = livres.filter(livre => {
+    const correspondRecherche =
+      livre.titre.toLowerCase().includes(recherche) ||
+      livre.auteur.toLowerCase().includes(recherche) ||
+      livre.description.toLowerCase().includes(recherche);
+
+    const correspondCategorie =
+      categorie === "" || livre.categorie === categorie;
+
+    return correspondRecherche && correspondCategorie;
+  });
+
+  if (resultats.length === 0) {
+    zone.innerHTML = "<p>Aucun livre trouvé.</p>";
+    return;
+  }
+
+  zone.innerHTML = resultats.map(livre => `
+    <article class="livre">
+      <h3>${echapper(livre.titre)}</h3>
+      <p><strong>Auteur :</strong> ${echapper(livre.auteur)}</p>
+      <p><strong>Catégorie :</strong> ${echapper(livre.categorie)}</p>
+      <p>${echapper(livre.description)}</p>
+    </article>
+  `).join("");
+}
+
+function ajouterLivre(event) {
+  event.preventDefault();
+
+  if (!adminConnecte) {
+    alert("Accès réservé à l'administrateur.");
+    return;
+  }
+
+  const nouveauLivre = {
+    id: Date.now(),
+    titre: document.getElementById("titreLivre").value.trim(),
+    auteur: document.getElementById("auteurLivre").value.trim(),
+    categorie: document.getElementById("categorieLivre").value,
+    description: document.getElementById("descriptionLivre").value.trim()
+  };
+
+  livres.push(nouveauLivre);
+  sauvegarderLivres();
+
+  event.target.reset();
+  alert("Le livre a été ajouté !");
+  actualiserAdmin();
+  afficherPage("catalogue");
+}
+
+function inscrireUtilisateur(event) {
+  event.preventDefault();
+
+  const nom = document.getElementById("nomInscription").value.trim();
+  const identifiant = document.getElementById("identifiantInscription").value.trim();
+  const mot = document.getElementById("motInscription").value;
+
+  if (utilisateurs.some(u =>
+    u.identifiant.toLowerCase() === identifiant.toLowerCase()
+  )) {
+    afficherMessage("messageInscription", "Cet identifiant existe déjà.", true);
+    return;
+  }
+
+  utilisateurs.push({
+    id: Date.now(),
+    nom,
+    identifiant,
+    mot
+  });
+
+  sauvegarderUtilisateurs();
+  event.target.reset();
+
+  afficherMessage("messageInscription", "Compte créé ! Vous pouvez maintenant vous connecter.");
+}
+
+function connecterUtilisateur(event) {
+  event.preventDefault();
+
+  const identifiant = document.getElementById("identifiantConnexion").value.trim();
+  const mot = document.getElementById("motConnexion").value;
+
+  const utilisateur = utilisateurs.find(u =>
+    u.identifiant.toLowerCase() === identifiant.toLowerCase() &&
+    u.mot === mot
+  );
+
+  if (!utilisateur) {
+    afficherMessage("messageConnexion", "Identifiant ou mot de passe incorrect.", true);
+    return;
+  }
+
+  utilisateurConnecte = utilisateur;
+  document.getElementById("boutonCompte").classList.remove("cache");
+  event.target.reset();
+
+  afficherPage("compte");
+}
+
+function afficherCompte() {
+  if (!utilisateurConnecte) return;
+
+  document.getElementById("informationsCompte").innerHTML = `
+    <p><strong>Nom :</strong> ${echapper(utilisateurConnecte.nom)}</p>
+    <p><strong>Identifiant :</strong> ${echapper(utilisateurConnecte.identifiant)}</p>
+    <p>Votre compte est connecté à BiblioFacile.</p>
+  `;
+}
+
+function deconnecterUtilisateur() {
+  utilisateurConnecte = null;
+  document.getElementById("boutonCompte").classList.add("cache");
+  alert("Vous êtes déconnecté.");
+  afficherPage("accueil");
+}
+
+function connecterAdmin(event) {
+  event.preventDefault();
+
+  const nom = document.getElementById("nomAdmin").value.trim();
+  const mot = document.getElementById("motAdmin").value;
+
+  if (nom === "KAMGA SOB KILLIAN" && mot === "Biblio2026") {
+    adminConnecte = true;
+
+    document.getElementById("connexionAdmin").classList.add("cache");
+    document.getElementById("espaceAdmin").classList.remove("cache");
+
+    actualiserAdmin();
+  } else {
+    afficherMessage("messageAdmin", "Identifiants administrateur incorrects.", true);
+  }
+}
+
+function deconnecterAdmin() {
+  adminConnecte = false;
+
+  document.getElementById("connexionAdmin").classList.remove("cache");
+  document.getElementById("espaceAdmin").classList.add("cache");
+
+  document.getElementById("nomAdmin").value = "";
+  document.getElementById("motAdmin").value = "";
+
+  afficherPage("accueil");
+}
+
+function actualiserAdmin() {
+  if (!adminConnecte) return;
+
+  document.getElementById("nombreLivres").textContent = livres.length;
+  document.getElementById("nombreUtilisateurs").textContent = utilisateurs.length;
+
+  document.getElementById("gestionLivres").innerHTML = livres.map(livre => `
+    <div class="card">
+      <strong>${echapper(livre.titre)}</strong>
+      <p>${echapper(livre.auteur)} — ${echapper(livre.categorie)}</p>
+      <div class="actions">
+        <button onclick="modifierLivre(${livre.id})">Modifier</button>
+        <button class="danger" onclick="supprimerLivre(${livre.id})">Supprimer</button>
+      </div>
+    </div>
+  `).join("") || "<p>Aucun livre.</p>";
+
+  document.getElementById("gestionUtilisateurs").innerHTML = utilisateurs.map(u => `
+    <div class="card">
+      <strong>${echapper(u.nom)}</strong>
+      <p>Identifiant : ${echapper(u.identifiant)}</p>
+      <button class="danger" onclick="supprimerUtilisateur(${u.id})">
+        Supprimer le compte
+      </button>
+    </div>
+  `).join("") || "<p>Aucun utilisateur inscrit.</p>";
+}
+
+function modifierLivre(id) {
+  const livre = livres.find(l => l.id === id);
+  if (!livre) return;
+
+  const titre = prompt("Nouveau titre :", livre.titre);
+  if (titre === null) return;
+
+  const auteur = prompt("Nouvel auteur :", livre.auteur);
+  if (auteur === null) return;
+
+  const description = prompt("Nouvelle description :", livre.description);
+  if (description === null) return;
+
+  livre.titre = titre.trim() || livre.titre;
+  livre.auteur = auteur.trim() || livre.auteur;
+  livre.description = description.trim() || livre.description;
+
+  sauvegarderLivres();
+  actualiserAdmin();
+  alert("Livre modifié !");
+}
+
+function supprimerLivre(id) {
+  if (!confirm("Voulez-vous vraiment supprimer ce livre ?")) return;
+
+  livres = livres.filter(l => l.id !== id);
+  sauvegarderLivres();
+  actualiserAdmin();
+}
+
+function supprimerUtilisateur(id) {
+  if (!confirm("Supprimer définitivement ce compte de démonstration ?")) return;
+
+  utilisateurs = utilisateurs.filter(u => u.id !== id);
+  sauvegarderUtilisateurs();
+
+  if (utilisateurConnecte && utilisateurConnecte.id === id) {
+    deconnecterUtilisateur();
+  }
+
+  actualiserAdmin();
+}
+
+function enregistrerCouleurs() {
+  if (!adminConnecte) return;
+
+  const couleurs = {
+    fond: document.getElementById("couleurFond").value,
+    carte: document.getElementById("couleurCarte").value,
+    or: document.getElementById("couleurOr").value
+  };
+
+  localStorage.setItem(CLE_COULEURS, JSON.stringify(couleurs));
+  appliquerCouleurs(couleurs);
+  alert("Couleurs enregistrées !");
+}
+
+function appliquerCouleurs(couleurs) {
+  document.documentElement.style.setProperty("--fond", couleurs.fond);
+  document.documentElement.style.setProperty("--carte", couleurs.carte);
+  document.documentElement.style.setProperty("--or", couleurs.or);
+
+  document.getElementById("couleurFond").value = couleurs.fond;
+  document.getElementById("couleurCarte").value = couleurs.carte;
+  document.getElementById("couleurOr").value = couleurs.or;
+}
+
+function afficherMessage(id, message, erreur = false) {
+  const zone = document.getElementById(id);
+  zone.innerHTML = `<div class="message ${erreur ? "erreur" : ""}">${echapper(message)}</div>`;
+}
+
+function echapper(texte) {
+  return String(texte).replace(/[&<>"']/g, caractere => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[caractere]);
+}
+
+const couleursEnregistrees = lireStockage(CLE_COULEURS, null);
+
+if (couleursEnregistrees) {
+  appliquerCouleurs(couleursEnregistrees);
+}
+
+sauvegarderLivres();
+afficherLivres();
+</script>
+
+</body>
+</html>
